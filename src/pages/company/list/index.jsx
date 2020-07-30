@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'umi';
 
 import { Button, Space, Drawer, Input, Select, Form, Col, Row, InputNumber, Spin, message, Popconfirm } from 'antd';
@@ -8,13 +9,21 @@ import { PlusOutlined } from '@ant-design/icons';
 const { Option } = Select;
 
 // 引入 service
-import { updateRemote, deleteRemote, addRemote } from '@/services/company/list';
+import { updateRemote, deleteRemote, addRemote, getSelectRemote } from '@/services/company/list';
 
-const index = ({ list }) => {
+const index = ({ list, dispatch }) => {
     const [visible, setVisible] = useState(false);
     const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(false);
     const [isAdd, setIsAdd] = useState(true); // 区分新增和修改
+    const [selPlaceList, setSelPlaceList] = useState(['1', '2', '3']); // 下拉列表数据
+    const [selPropertyList, setSelPropertyList] = useState([]);
+
+    useEffect(() => {
+        if (visible) {
+            getSelectData();
+        }
+    },[visible])
 
     const columns = [
         {
@@ -83,6 +92,9 @@ const index = ({ list }) => {
         .then(res => {
             if (res) {
                 message.success('删除成功');
+                dispatch({
+                    type: 'list/getRemote'
+                });
             }
         })
         .catch(err => {
@@ -109,11 +121,14 @@ const index = ({ list }) => {
         if (isAdd) { // 新增
             addRemote(fieldsValue)
             .then(res => {
-                if (status == 201) {
+                // if (status == 201) { // 状态码每次不一样？
                     setLoading(false);
                     setVisible(false);
                     message.success('创建成功');
-                }
+                    dispatch({
+                        type: 'list/getRemote'
+                    });
+                // }
             })
             .catch(err => {
                 console.log(err);
@@ -129,6 +144,9 @@ const index = ({ list }) => {
                     setLoading(false);
                     setVisible(false);
                     message.success(res.msg);
+                    dispatch({
+                        type: 'list/getRemote'
+                    });
                 }
             })
             .catch(err => {
@@ -143,10 +161,27 @@ const index = ({ list }) => {
       setVisible(false);
     };
 
+    const getSelectData = () => { // 获取下拉框数据
+        const  { placeList, propertyList } = getSelectRemote();
+        // console.log(placeList, propertyList)
+        placeList.then(res => {
+            setSelPlaceList(res);
+        }).catch(err => {
+            console.log(err);
+        });
+
+        propertyList.then(res => {
+            setSelPropertyList(res);
+        }).catch(err => {
+            console.log(err);
+        })
+    };
+
     return (
-        <div>
+        <PageHeaderWrapper>
             <ProTable
                 columns={columns}
+                headerTitle="所有企业"
                 dataSource={data}
                 toolBarRender={() => [
                     <Button key="3" type="primary" onClick={handleAdd}>
@@ -211,8 +246,9 @@ const index = ({ list }) => {
                             rules={[{ required: true, message: '请选择行业' }]}
                         >
                             <Select placeholder="请选择行业"> 
-                                <Option value="xiao">Xiaoxiao Fu</Option>
-                                <Option value="mao">Maomao Zhou</Option>
+                                {selPropertyList.map((item, index) =>
+                                    <Option value={item} key={index}>{item}</Option>
+                                )}
                             </Select>
                         </Form.Item>
                     </Col>
@@ -223,8 +259,14 @@ const index = ({ list }) => {
                             rules={[{ required: true, message: '请选择企业规模' }]}
                         >
                             <Select placeholder="请选择企业规模">
-                                <Option value="private">Private</Option>
-                                <Option value="public">Public</Option>
+                                <Option value="未融资">未融资</Option>
+                                <Option value="天使轮">天使轮</Option>
+                                <Option value="A 轮">A 轮</Option>
+                                <Option value="B 轮">B 轮</Option>
+                                <Option value="C 轮">C 轮</Option>
+                                <Option value="D 轮">D 轮及以上</Option>
+                                <Option value="已上市">已上市</Option>
+                                <Option value="不需要融资">不需要融资</Option>
                             </Select>
                         </Form.Item>
                     </Col>
@@ -265,7 +307,9 @@ const index = ({ list }) => {
                             label="所在城市"
                             rules={[{ required: true, message: '请输入所在城市' }]}>
                             <Select placeholder="请选择所在城市">
-                                <Option value="1">1</Option>
+                                {selPlaceList.map((item, index) =>
+                                    <Option value={item} key={index}>{item}</Option>
+                                )}
                             </Select>
                         </Form.Item>
                     </Col>
@@ -292,7 +336,7 @@ const index = ({ list }) => {
                     </Row>
                 </Form></Spin>
             </Drawer>
-        </div>
+        </PageHeaderWrapper>
     )
 }
 
