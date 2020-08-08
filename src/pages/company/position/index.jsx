@@ -9,14 +9,14 @@ import { PlusOutlined } from '@ant-design/icons';
 const { Option } = Select;
 
 // 引入 service
-import { updateRemote, deleteRemote, addRemote, getSelectRemote } from '@/services/company/list';
+import { updateRemote, deleteRemote, addRemote, getSelectRemote } from '@/services/company/position';
 
-const index = ({ list, dispatch }) => {
+const index = ({ position, dispatch }) => {
     const [visible, setVisible] = useState(false);
     const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(false);
-    const [isAdd, setIsAdd] = useState(true); // 区分新增和修改
-    const [selPlaceList, setSelPlaceList] = useState(['1', '2', '3']); // 下拉列表数据
+    // const [isAdd, setIsAdd] = useState(true); // 区分新增和修改
+    const [selTypeList, setSelTypeList] = useState([]); // 下拉列表数据
     const [selPropertyList, setSelPropertyList] = useState([]);
 
     useEffect(() => {
@@ -24,37 +24,42 @@ const index = ({ list, dispatch }) => {
           formRef.current.resetFields();
         }
     },[formData])
-    useEffect(() => {
-        if (visible) {
-            getSelectData();
-        }
-    },[visible])
 
     const columns = [
         {
             title: '编号',
-            dataIndex: 'id',
-            key: 'id'
+            dataIndex: 'jobId',
+            key: 'jobId'
         },
         {
-            title: '公司名称',
+            title: '职位名称',
             dataIndex: 'name',
             key: 'name'
         },
         {
-            title: '所在地',
-            dataIndex: 'place',
-            key: 'place'
+            title: '薪资',
+            dataIndex: 'salary',
+            key: 'salary'
         },
         {
-            title: '公司性质',
+            title: '行业',
             dataIndex: 'property',
             key: 'property'
         },
         {
-            title: '公司规模',
-            dataIndex: 'size',
-            key: 'size'
+            title: '职位类型',
+            dataIndex: 'type',
+            key: 'type'
+        },
+        {
+          title: '经验',
+          dataIndex: 'experience',
+          key: 'experience'
+        },
+        {
+          title: '学历',
+          dataIndex: 'education',
+          key: 'education'
         },
         {
             title: '操作',
@@ -75,20 +80,20 @@ const index = ({ list, dispatch }) => {
             ),
           },
     ];
-    let { data } = list;
-    if (data) {
-        data = data.map(item => {
-            return {...item, key: item.id}
-        });
-    }
+    let { data } = position;
+    // if (data) {
+    //     data = data.map(item => {
+    //         return {...item, key: item.jobId}
+    //     });
+    // }
     const formRef = React.createRef();// 定位表单
 
     const handleEdit = (record) => {
-        setIsAdd(false);
+        getSelectData();
+        record.workMonthMin = parseInt(record.workMonthMin);
+        record.workMonthMax = parseInt(record.workMonthMax);
         setFormData(record);
-        if (formRef.current != null) { // 利用表单重置实现表单数据更新
-            formRef.current.resetFields();
-        }
+        
         setVisible(true);
     };
     const confirm = (id) => {
@@ -110,39 +115,15 @@ const index = ({ list, dispatch }) => {
     const cancel = () => {
         message.info('已取消');
     };
-    const handleAdd = () => {
-        setIsAdd(true);
-        setFormData({staffNumMin: 0, staffNumMax: 100});
-        if (formRef.current != null) {
-            formRef.current.resetFields();
-        }
-        setVisible(true);
-    };
+    
 
     const handleSubmit = () => {
-        const fieldsValue = formRef.current.getFieldsValue();
+        const fieldsValue = formRef2.current.getFieldsValue();
         setLoading(true);
         // 发送请求
-        if (isAdd) { // 新增
-            addRemote(fieldsValue)
-            .then(res => {
-                // if (status == 201) { // 状态码每次不一样？
-                    setLoading(false);
-                    setVisible(false);
-                    message.success('创建成功');
-                    dispatch({
-                        type: 'list/getRemote'
-                    });
-                // }
-            })
-            .catch(err => {
-                console.log(err);
-                setLoading(false);
-                setVisible(false);
-                message.error('创建失败')
-            })
-        }else { // 修改
-            fieldsValue.id = formData.id;
+        
+            fieldsValue.jobId = formData.jobId;
+            console.log(formData)
             updateRemote(fieldsValue)
             .then(res => {
                 if (res.msg == "修改成功") {
@@ -158,7 +139,6 @@ const index = ({ list, dispatch }) => {
                 setLoading(false);
                 message.error(err);
             });
-        }
         
     };
 
@@ -167,10 +147,9 @@ const index = ({ list, dispatch }) => {
     };
 
     const getSelectData = () => { // 获取下拉框数据
-        const  { placeList, propertyList } = getSelectRemote();
-        // console.log(placeList, propertyList)
-        placeList.then(res => {
-            setSelPlaceList(res);
+        const  { typeList, propertyList } = getSelectRemote();
+        typeList.then(res => {
+            setSelTypeList(res);
         }).catch(err => {
             console.log(err);
         });
@@ -186,17 +165,11 @@ const index = ({ list, dispatch }) => {
         <PageHeaderWrapper>
             <ProTable
                 columns={columns}
-                headerTitle="所有企业"
+                headerTitle="职位管理"
                 dataSource={data}
-                toolBarRender={() => [
-                    <Button key="3" type="primary" onClick={handleAdd}>
-                      <PlusOutlined />
-                      新建企业
-                    </Button>,
-                ]}
             />
             <Drawer
-                title="查看/编辑企业信息"
+                title="查看/编辑职位信息"
                 width={720}
                 onClose={handleCancel}
                 visible={visible}
@@ -219,26 +192,26 @@ const index = ({ list, dispatch }) => {
                 <Spin spinning={loading}>
                 <Form layout="vertical"
                     initialValues={formData}
-                    ref={formRef}>
+                    ref={formRefS}>
                     <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item
                             name="name"
-                            label="企业名称"
-                            rules={[{ required: true, message: '请输入企业名称' }]}
+                            label="职位名称"
+                            rules={[{ required: true, message: '请输入职位名称' }]}
                         >
-                            <Input placeholder="请输入企业名称" />
+                            <Input placeholder="请输入职位名称" />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item
-                        name="position"
-                        label="地址"
-                        rules={[{ required: true, message: '请输入详细地址' }]}
+                        name="salary"
+                        label="岗位薪资"
+                        rules={[{ required: true, message: '请输入岗位薪资' }]}
                         >
                             <Input
                                 style={{ width: '100%' }}
-                                placeholder="请输入详细地址"
+                                placeholder="请输入岗位薪资"
                             />
                         </Form.Item>
                     </Col>
@@ -259,60 +232,12 @@ const index = ({ list, dispatch }) => {
                     </Col>
                     <Col span={12}>
                         <Form.Item
-                            name="size"
-                            label="企业规模"
+                            name="type"
+                            label="岗位类型"
                             rules={[{ required: true, message: '请选择企业规模' }]}
                         >
-                            <Select placeholder="请选择企业规模">
-                                <Option value="未融资">未融资</Option>
-                                <Option value="天使轮">天使轮</Option>
-                                <Option value="A 轮">A 轮</Option>
-                                <Option value="B 轮">B 轮</Option>
-                                <Option value="C 轮">C 轮</Option>
-                                <Option value="D 轮">D 轮及以上</Option>
-                                <Option value="已上市">已上市</Option>
-                                <Option value="不需要融资">不需要融资</Option>
-                            </Select>
-                        </Form.Item>
-                    </Col>
-                    </Row>
-                    <Row gutter={16}>
-                    <Col span={12}>
-                        
-                        <Form.Item
-                            label="员工数量（起）"
-                            name="staffNumMin"
-                            >
-                            <InputNumber defaultValue={0} min={0}></InputNumber>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        
-                        <Form.Item
-                            label="员工数量（止）"
-                            name="staffNumMax"
-                            >
-                            <InputNumber defaultValue={100} min={0}></InputNumber>
-                        </Form.Item>
-                    </Col>
-                    </Row>
-                    <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item
-                        name="avaSalary"
-                        label="平均薪资（月薪）"
-                        rules={[{ required: true, message: '请输入平均薪资' }]}
-                        >
-                            <InputNumber defaultValue={10000} min={0}></InputNumber>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item
-                            name="place"
-                            label="所在城市"
-                            rules={[{ required: true, message: '请输入所在城市' }]}>
-                            <Select placeholder="请选择所在城市">
-                                {selPlaceList.map((item, index) =>
+                            <Select placeholder="请选择职位类型">
+                                {selTypeList.map((item, index) =>
                                     <Option value={item} key={index}>{item}</Option>
                                 )}
                             </Select>
@@ -321,19 +246,73 @@ const index = ({ list, dispatch }) => {
                     </Row>
                     <Row gutter={16}>
                     <Col span={12}>
+                        
                         <Form.Item
-                        name="workTime"
-                        label="工作时间"
+                            label="实习时长（起）"
+                            name="workMonthMin"
+                            >
+                            <InputNumber min={0} max={12}></InputNumber> 个月
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        
+                        <Form.Item
+                            label="实习时长（止）"
+                            name="workMonthMax"
+                            >
+                            <InputNumber min={0} max={12}></InputNumber> 个月
+                        </Form.Item>
+                    </Col>
+                    </Row>
+                    <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item
+                        name="experience"
+                        label="工作经验要求"
+                        rules={[{ required: true, message: '请输入工作经验要求' }]}
                         >
-                            <Input placeholder="请输入工作时间描述" />
+                            <Select placeholder="请选择工作经验要求">
+                                <Option value="无经验要求" key={1}>无经验要求</Option>
+                                <Option value="1年以内" key={2}>1年以内</Option>
+                                <Option value="1-3年" key={3}>1-3年</Option>
+                                <Option value="3-5年" key={4}>3-5年</Option>
+                                <Option value="5年以上" key={5}>5年以上</Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item
+                            name="education"
+                            label="学历要求"
+                            rules={[{ required: true, message: '请输入学历要求' }]}>
+                            <Select placeholder="请选择学历要求">
+                                <Option value="不限" key={1}>不限</Option>
+                                <Option value="初中及以下" key={2}>初中及以下</Option>
+                                <Option value="中专" key={3}>中专</Option>
+                                <Option value="高中" key={4}>高中</Option>
+                                <Option value="大专" key={5}>大专</Option>
+                                <Option value="本科" key={5}>本科</Option>
+                                <Option value="硕士" key={5}>硕士</Option>
+                                <Option value="博士" key={5}>博士</Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    </Row>
+                    <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item
+                        name="workDay"
+                        label="每周工作天数"
+                        >
+                            <Input placeholder="请输入每周工作天数" />
                         </Form.Item>
                     </Col>
                     </Row>
                     <Row gutter={16}>
                     <Col span={24}>
                         <Form.Item
-                            name="desc"
-                            label="企业简介"
+                            name="detail"
+                            label="岗位详情"
                             >
                             <Input.TextArea rows={8} placeholder="在此输入内容" />
                         </Form.Item>
@@ -345,9 +324,9 @@ const index = ({ list, dispatch }) => {
     )
 }
 
-const mapStateToProps = ({ list }) => {
+const mapStateToProps = ({ position }) => {
     return {
-        list,
+        position,
     }
 }
 

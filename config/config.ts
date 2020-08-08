@@ -103,9 +103,15 @@ export default defineConfig({
                   name: 'position',
                   icon: 'smile',
                   path: '/company/position',
-                  component: './company/Position',
+                  component: './company/position',
                 },
               ],
+            },
+            {
+              name: 'senior',
+              path: '/senior',
+              icon: 'crown',
+              component: './senior',
             },
             {
               component: './404',

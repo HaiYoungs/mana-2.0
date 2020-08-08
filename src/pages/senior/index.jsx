@@ -1,34 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'umi';
+import moment from 'moment';
 
-import { Button, Space, Drawer, Input, Select, Form, Col, Row, InputNumber, Spin, message, Popconfirm } from 'antd';
+import { Button, Space, Drawer, Input, Select, DatePicker,
+ Form, Col, Row, InputNumber, Spin, message, Popconfirm } from 'antd';
 import ProTable from '@ant-design/pro-table';
 import { PlusOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
 // 引入 service
-import { updateRemote, deleteRemote, addRemote, getSelectRemote } from '@/services/company/list';
+import { updateRemote, deleteRemote, addRemote, getSelectRemote } from '@/services/senior';
 
-const index = ({ list, dispatch }) => {
+const index = ({ senior, dispatch }) => {
     const [visible, setVisible] = useState(false);
     const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(false);
-    const [isAdd, setIsAdd] = useState(true); // 区分新增和修改
-    const [selPlaceList, setSelPlaceList] = useState(['1', '2', '3']); // 下拉列表数据
-    const [selPropertyList, setSelPropertyList] = useState([]);
+    const [isAdd, setIsAdd] = useState(true); // 区分新增和修改 
 
     useEffect(() => {
         if (formRef.current != null) { // 利用表单重置实现表单数据更新
           formRef.current.resetFields();
         }
     },[formData])
-    useEffect(() => {
-        if (visible) {
-            getSelectData();
-        }
-    },[visible])
+    
 
     const columns = [
         {
@@ -37,24 +33,39 @@ const index = ({ list, dispatch }) => {
             key: 'id'
         },
         {
-            title: '公司名称',
-            dataIndex: 'name',
-            key: 'name'
+            title: '姓名',
+            dataIndex: 'userName',
+            key: 'userName'
         },
         {
-            title: '所在地',
-            dataIndex: 'place',
-            key: 'place'
+            title: '毕业院校',
+            dataIndex: 'schoolTag',
+            key: 'schoolTab'
         },
         {
-            title: '公司性质',
-            dataIndex: 'property',
-            key: 'property'
+            title: '毕业时间',
+            dataIndex: 'graduationTime',
+            key: 'graduationTime'
         },
         {
-            title: '公司规模',
-            dataIndex: 'size',
-            key: 'size'
+            title: '专业',
+            dataIndex: 'major',
+            key: 'major'
+        },
+        {
+            title: '就职企业',
+            dataIndex: 'company',
+            key: 'company'
+        },
+        {
+            title: '职业',
+            dataIndex: 'job',
+            key: 'job'
+        },
+        {
+            title: '就职时间',
+            dataIndex: 'jobTime',
+            key: 'jobTime'
         },
         {
             title: '操作',
@@ -75,7 +86,21 @@ const index = ({ list, dispatch }) => {
             ),
           },
     ];
-    let { data } = list;
+    // let data = [
+    //     {
+    //         id: 1,
+    //         userName: 'jhy',
+    //         pic: 'httpsljfdfj',
+    //         education: '本科',
+    //         schoolTab: '浙江传媒学院',
+    //         graduationTime: '2017-08-21',
+    //         major: 'fhsih',
+    //         company: '都放假撒',
+    //         job: 'ui螺丝钉解放',
+    //         jobTime: '2018-05-10'
+    //     }
+    // ]
+    let { data } = senior;
     if (data) {
         data = data.map(item => {
             return {...item, key: item.id}
@@ -84,6 +109,9 @@ const index = ({ list, dispatch }) => {
     const formRef = React.createRef();// 定位表单
 
     const handleEdit = (record) => {
+        // 日期加工
+        record.graduationTime = moment(record.graduationTime, 'YYYY-MM-DD');
+        record.jobTime = moment(record.jobTime, 'YYYY-MM-DD');
         setIsAdd(false);
         setFormData(record);
         if (formRef.current != null) { // 利用表单重置实现表单数据更新
@@ -98,7 +126,7 @@ const index = ({ list, dispatch }) => {
             if (res) {
                 message.success('删除成功');
                 dispatch({
-                    type: 'list/getRemote'
+                    type: 'senior/getRemote'
                 });
             }
         })
@@ -112,7 +140,6 @@ const index = ({ list, dispatch }) => {
     };
     const handleAdd = () => {
         setIsAdd(true);
-        setFormData({staffNumMin: 0, staffNumMax: 100});
         if (formRef.current != null) {
             formRef.current.resetFields();
         }
@@ -121,8 +148,11 @@ const index = ({ list, dispatch }) => {
 
     const handleSubmit = () => {
         const fieldsValue = formRef.current.getFieldsValue();
+        fieldsValue.pic = '';
+        fieldsValue.graduationTime = moment(fieldsValue.graduationTime).format('YYYY-MM-DD');
+        fieldsValue.jobTime = moment(fieldsValue.jobTime).format('YYYY-MM-DD');
         setLoading(true);
-        // 发送请求
+        //发送请求
         if (isAdd) { // 新增
             addRemote(fieldsValue)
             .then(res => {
@@ -142,6 +172,7 @@ const index = ({ list, dispatch }) => {
                 message.error('创建失败')
             })
         }else { // 修改
+            console.log(fieldsValue)
             fieldsValue.id = formData.id;
             updateRemote(fieldsValue)
             .then(res => {
@@ -150,7 +181,7 @@ const index = ({ list, dispatch }) => {
                     setVisible(false);
                     message.success(res.msg);
                     dispatch({
-                        type: 'list/getRemote'
+                        type: 'senior/getRemote'
                     });
                 }
             })
@@ -165,38 +196,21 @@ const index = ({ list, dispatch }) => {
     const handleCancel = () => {
       setVisible(false);
     };
-
-    const getSelectData = () => { // 获取下拉框数据
-        const  { placeList, propertyList } = getSelectRemote();
-        // console.log(placeList, propertyList)
-        placeList.then(res => {
-            setSelPlaceList(res);
-        }).catch(err => {
-            console.log(err);
-        });
-
-        propertyList.then(res => {
-            setSelPropertyList(res);
-        }).catch(err => {
-            console.log(err);
-        })
-    };
-
     return (
         <PageHeaderWrapper>
             <ProTable
                 columns={columns}
-                headerTitle="所有企业"
+                headerTitle="学长管理"
                 dataSource={data}
                 toolBarRender={() => [
                     <Button key="3" type="primary" onClick={handleAdd}>
                       <PlusOutlined />
-                      新建企业
+                      新建
                     </Button>,
                 ]}
             />
             <Drawer
-                title="查看/编辑企业信息"
+                title="查看/编辑学长信息"
                 width={720}
                 onClose={handleCancel}
                 visible={visible}
@@ -223,22 +237,22 @@ const index = ({ list, dispatch }) => {
                     <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item
-                            name="name"
-                            label="企业名称"
-                            rules={[{ required: true, message: '请输入企业名称' }]}
+                            name="userName"
+                            label="姓名"
+                            rules={[{ required: true, message: '请输入学长姓名' }]}
                         >
-                            <Input placeholder="请输入企业名称" />
+                            <Input placeholder="请输入学长姓名" />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item
-                        name="position"
-                        label="地址"
-                        rules={[{ required: true, message: '请输入详细地址' }]}
+                        name="schoolTag"
+                        label="毕业院校"
+                        rules={[{ required: true, message: '请输入毕业院校' }]}
                         >
                             <Input
                                 style={{ width: '100%' }}
-                                placeholder="请输入详细地址"
+                                placeholder="请输入毕业院校"
                             />
                         </Form.Item>
                     </Col>
@@ -246,33 +260,20 @@ const index = ({ list, dispatch }) => {
                     <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item
-                            name="property"
-                            label="所在行业"
-                            rules={[{ required: true, message: '请选择行业' }]}
+                            name="graduationTime"
+                            label="毕业时间"
+                            rules={[{ required: true, message: '请选择毕业时间' }]}
                         >
-                            <Select placeholder="请选择行业"> 
-                                {selPropertyList.map((item, index) =>
-                                    <Option value={item} key={index}>{item}</Option>
-                                )}
-                            </Select>
+                            <DatePicker ></DatePicker>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item
-                            name="size"
-                            label="企业规模"
-                            rules={[{ required: true, message: '请选择企业规模' }]}
+                        name="jobTime"
+                        label="就职时间"
+                        rules={[{ required: true, message: '请输入就职时间' }]}
                         >
-                            <Select placeholder="请选择企业规模">
-                                <Option value="未融资">未融资</Option>
-                                <Option value="天使轮">天使轮</Option>
-                                <Option value="A 轮">A 轮</Option>
-                                <Option value="B 轮">B 轮</Option>
-                                <Option value="C 轮">C 轮</Option>
-                                <Option value="D 轮">D 轮及以上</Option>
-                                <Option value="已上市">已上市</Option>
-                                <Option value="不需要融资">不需要融资</Option>
-                            </Select>
+                            <DatePicker ></DatePicker>
                         </Form.Item>
                     </Col>
                     </Row>
@@ -280,74 +281,47 @@ const index = ({ list, dispatch }) => {
                     <Col span={12}>
                         
                         <Form.Item
-                            label="员工数量（起）"
-                            name="staffNumMin"
+                            label="就职企业"
+                            name="company"
+                            rules={[{ required: true, message: '请填写就职企业' }]}
                             >
-                            <InputNumber defaultValue={0} min={0}></InputNumber>
+                            <Input placeholder="请输入就职企业" />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         
                         <Form.Item
-                            label="员工数量（止）"
-                            name="staffNumMax"
+                            label="职业"
+                            name="job"
+                            rules={[{ required: true, message: '请填写职业' }]}
                             >
-                            <InputNumber defaultValue={100} min={0}></InputNumber>
+                            <Input placeholder="请输入职业" />
                         </Form.Item>
                     </Col>
                     </Row>
                     <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item
-                        name="avaSalary"
-                        label="平均薪资（月薪）"
-                        rules={[{ required: true, message: '请输入平均薪资' }]}
+                            name="major"
+                            label="专业"
+                            rules={[{ required: true, message: '请填写专业' }]}
                         >
-                            <InputNumber defaultValue={10000} min={0}></InputNumber>
+                            <Input placeholder="请输入专业" />
                         </Form.Item>
                     </Col>
-                    <Col span={12}>
-                        <Form.Item
-                            name="place"
-                            label="所在城市"
-                            rules={[{ required: true, message: '请输入所在城市' }]}>
-                            <Select placeholder="请选择所在城市">
-                                {selPlaceList.map((item, index) =>
-                                    <Option value={item} key={index}>{item}</Option>
-                                )}
-                            </Select>
-                        </Form.Item>
-                    </Col>
+                    
+                    
                     </Row>
-                    <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item
-                        name="workTime"
-                        label="工作时间"
-                        >
-                            <Input placeholder="请输入工作时间描述" />
-                        </Form.Item>
-                    </Col>
-                    </Row>
-                    <Row gutter={16}>
-                    <Col span={24}>
-                        <Form.Item
-                            name="desc"
-                            label="企业简介"
-                            >
-                            <Input.TextArea rows={8} placeholder="在此输入内容" />
-                        </Form.Item>
-                    </Col>
-                    </Row>
+                    
                 </Form></Spin>
             </Drawer>
         </PageHeaderWrapper>
     )
 }
 
-const mapStateToProps = ({ list }) => {
+const mapStateToProps = ({ senior }) => {
     return {
-        list,
+        senior,
     }
 }
 
