@@ -19,6 +19,24 @@ export const getRemoteList = async () => {
         console.log(err);
     })
 }
+// 根据公司 id 获取职位列表
+export const getRemoteListById = async params => {
+    return request(baseUrl + '/job/search', {
+        method: 'POST',
+        params: {
+            everyPage: 10,
+            clientPage: 1,
+            id: params.id,
+        }
+    })
+    .then(res => {
+        console.log(res);
+        return res;
+    })
+    .catch(err => {
+        console.log(err);
+    })
+}
 
 // 修改职位信息
 export const updateRemote = async (data) => {
@@ -35,7 +53,7 @@ export const deleteRemote = async (id) => {
     return request(baseUrl + '/job/delete', {
         method: 'POST',
         contentType: 'application/json',
-        data: {id: id},
+        params: {id},
     });
 }
 

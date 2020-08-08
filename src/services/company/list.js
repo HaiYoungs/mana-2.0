@@ -31,12 +31,10 @@ export const updateRemote = async (data) => {
 
 // 删除企业
 export const deleteRemote = async (id) => {
-    //id = id.toString();
-    console.log(id)
     return request(baseUrl + '/company/delete', {
         method: 'POST',
         contentType: 'application/x-www-form-urlencoded',
-        data: {id: id},
+        params: {id},
     });
 }
 

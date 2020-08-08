@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import { connect } from 'umi';
+import { connect, useParams } from 'umi';
 
 import { Button, Space, Drawer, Input, Select, Form, Col, Row, InputNumber, Spin, message, Popconfirm } from 'antd';
 import ProTable from '@ant-design/pro-table';
@@ -19,11 +19,24 @@ const index = ({ position, dispatch }) => {
     const [selTypeList, setSelTypeList] = useState([]); // 下拉列表数据
     const [selPropertyList, setSelPropertyList] = useState([]);
 
+    const params = useParams();
     useEffect(() => {
         if (formRef.current != null) { // 利用表单重置实现表单数据更新
           formRef.current.resetFields();
         }
-    },[formData])
+    },[formData]);
+    useEffect(() => {
+        if (params.id == ':id') { // 所有职位
+            dispatch({
+                type: 'position/getRemote',
+            });
+        } else { // 按公司查看
+            dispatch({
+                type: 'position/getRemoteById',
+                payload: params,
+            });
+        }
+    }, []);
 
     const columns = [
         {
@@ -80,7 +93,9 @@ const index = ({ position, dispatch }) => {
             ),
           },
     ];
-    let { data } = position;
+    let data;
+    // let { data } = position;
+    console.log(position);
     // if (data) {
     //     data = data.map(item => {
     //         return {...item, key: item.jobId}
@@ -118,7 +133,7 @@ const index = ({ position, dispatch }) => {
     
 
     const handleSubmit = () => {
-        const fieldsValue = formRef2.current.getFieldsValue();
+        const fieldsValue = formRef.current.getFieldsValue();
         setLoading(true);
         // 发送请求
         
@@ -192,7 +207,7 @@ const index = ({ position, dispatch }) => {
                 <Spin spinning={loading}>
                 <Form layout="vertical"
                     initialValues={formData}
-                    ref={formRefS}>
+                    ref={formRef}>
                     <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item

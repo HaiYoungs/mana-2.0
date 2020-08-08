@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 
 import { Button, Space, Drawer, Input, Select, Form, Col, Row, InputNumber, Spin, message, Popconfirm } from 'antd';
 import ProTable from '@ant-design/pro-table';
@@ -61,7 +61,7 @@ const index = ({ list, dispatch }) => {
             key: 'action',
             render: (text, record) => (
               <Space size="middle">
-                <Button type="primary" onClick={() => {handleEdit(record)}}>编辑</Button>
+                <Button size="small" type="primary" onClick={() => {handleEdit(record)}}>编辑</Button>
                 <Popconfirm
                     title="确认删除此纪录?"
                     onConfirm={() => {confirm(record.id)}}
@@ -69,8 +69,9 @@ const index = ({ list, dispatch }) => {
                     okText="是"
                     cancelText="否"
                 >
-                    <Button type="danger">删除</Button>
+                    <Button size="small" type="danger">删除</Button>
                 </Popconfirm>
+                <Button size="small" type="default" onClick={() => handlePosition(record.id)}>查看职位</Button>
               </Space>
             ),
           },
@@ -117,6 +118,9 @@ const index = ({ list, dispatch }) => {
             formRef.current.resetFields();
         }
         setVisible(true);
+    };
+    const handlePosition = (id) => {
+        history.push(`/company/position/${id}`);
     };
 
     const handleSubmit = () => {

@@ -1,13 +1,15 @@
-import { getRemoteList } from '../../services/company/position';
+import { getRemoteList, getRemoteListById } from '../../services/company/position';
 
 const PositionModel = {
     namespace: 'position',
     state: {
         name: '',
+        pageInfo: {},
     },
     reducers: {
         getDataList(state, { payload }) {
-            return payload;
+            console.log(payload)
+            return {...payload};
         }
     },
     effects: {
@@ -17,18 +19,26 @@ const PositionModel = {
                 type: 'getDataList',
                 payload: { data }
             })
+        },
+        *getRemoteById({ payload }, { put, call }) {
+            const data = yield call(getRemoteListById, payload);
+            console.log(data)
+            yield put({
+                type: 'getDataList',
+                payload: {data},
+            })
         }
     },
     subscriptions: {
-        setup({ dispatch, history }) {
-            return history.listen(({ pathname }) => {
-                if (pathname === '/company/position') {
-                    dispatch({
-                        type: 'getRemote',
-                    })
-                }
-            })
-        }
+        // setup({ dispatch, history }) {
+        //     return history.listen(({ pathname }) => {
+        //         if (pathname === '/company/position') {
+        //             dispatch({
+        //                 type: 'getRemote',
+        //             })
+        //         }
+        //     })
+        // }
     }
 }
 

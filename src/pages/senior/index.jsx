@@ -86,20 +86,6 @@ const index = ({ senior, dispatch }) => {
             ),
           },
     ];
-    // let data = [
-    //     {
-    //         id: 1,
-    //         userName: 'jhy',
-    //         pic: 'httpsljfdfj',
-    //         education: '本科',
-    //         schoolTab: '浙江传媒学院',
-    //         graduationTime: '2017-08-21',
-    //         major: 'fhsih',
-    //         company: '都放假撒',
-    //         job: 'ui螺丝钉解放',
-    //         jobTime: '2018-05-10'
-    //     }
-    // ]
     let { data } = senior;
     if (data) {
         data = data.map(item => {
@@ -140,6 +126,7 @@ const index = ({ senior, dispatch }) => {
     };
     const handleAdd = () => {
         setIsAdd(true);
+        setFormData({});
         if (formRef.current != null) {
             formRef.current.resetFields();
         }
@@ -161,7 +148,7 @@ const index = ({ senior, dispatch }) => {
                     setVisible(false);
                     message.success('创建成功');
                     dispatch({
-                        type: 'list/getRemote'
+                        type: 'senior/getRemote'
                     });
                 // }
             })

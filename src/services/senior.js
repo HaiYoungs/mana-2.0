@@ -35,7 +35,7 @@ export const deleteRemote = async (id) => {
     return request(baseUrl + '/senior/delete', {
         method: 'POST',
         contentType: 'application/json',
-        data: {id: id},
+        params: {id},
     });
 }
 

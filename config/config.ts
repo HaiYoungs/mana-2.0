@@ -102,9 +102,9 @@ export default defineConfig({
                 {
                   name: 'position',
                   icon: 'smile',
-                  path: '/company/position',
+                  path: '/company/position/:id',
                   component: './company/position',
-                },
+                }
               ],
             },
             {
