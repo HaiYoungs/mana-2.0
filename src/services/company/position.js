@@ -40,6 +40,7 @@ export const getRemoteListById = async params => {
 
 // 修改职位信息
 export const updateRemote = async (data) => {
+    console.log(data)
     return request(baseUrl + '/job/update', {
         method: 'POST',
         contentType: 'application/json',
@@ -67,7 +68,7 @@ export const addRemote = async (value) => {
 
 // 获取下拉列表数据
 export const getSelectRemote = () => {
-    let typeList = request(baseUrl + '/job/search', {
+    let typeList = request(baseUrl + '/job/searchType', {
         method: 'GET',
         contentType: 'application/json',
     });

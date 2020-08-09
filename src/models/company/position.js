@@ -25,7 +25,7 @@ const PositionModel = {
             console.log(data)
             yield put({
                 type: 'getDataList',
-                payload: {data},
+                payload: { data: data.data, pager: data.pager },
             })
         }
     },

@@ -87,6 +87,7 @@ const index = ({ list, dispatch }) => {
     const handleEdit = (record) => {
         setIsAdd(false);
         setFormData(record);
+        console.log(record);
         if (formRef.current != null) { // 利用表单重置实现表单数据更新
             formRef.current.resetFields();
         }

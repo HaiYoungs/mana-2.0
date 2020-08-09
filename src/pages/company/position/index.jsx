@@ -93,22 +93,19 @@ const index = ({ position, dispatch }) => {
             ),
           },
     ];
-    let data;
-    // let { data } = position;
-    console.log(position);
-    // if (data) {
-    //     data = data.map(item => {
-    //         return {...item, key: item.jobId}
-    //     });
-    // }
+    let { data, pager } = position; // 表格数组
+
     const formRef = React.createRef();// 定位表单
 
     const handleEdit = (record) => {
         getSelectData();
-        record.workMonthMin = parseInt(record.workMonthMin);
-        record.workMonthMax = parseInt(record.workMonthMax);
+        // record.workMonthMin = Number(record.workMonthMin);
+        // record.workMonthMax = Number(record.workMonthMax);
+        console.log(record)
         setFormData(record);
-        
+        if (formRef.current != null) { // 利用表单重置实现表单数据更新
+            formRef.current.resetFields();
+        }
         setVisible(true);
     };
     const confirm = (id) => {
@@ -138,7 +135,7 @@ const index = ({ position, dispatch }) => {
         // 发送请求
         
             fieldsValue.jobId = formData.jobId;
-            console.log(formData)
+            console.log(fieldsValue)
             updateRemote(fieldsValue)
             .then(res => {
                 if (res.msg == "修改成功") {
@@ -263,19 +260,19 @@ const index = ({ position, dispatch }) => {
                     <Col span={12}>
                         
                         <Form.Item
-                            label="实习时长（起）"
                             name="workMonthMin"
-                            >
-                            <InputNumber min={0} max={12}></InputNumber> 个月
+                            label="实习时长（起）"
+                        >
+                            <InputNumber defaultValue={3} min={0} max={12}></InputNumber> 个月
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         
                         <Form.Item
-                            label="实习时长（止）"
                             name="workMonthMax"
-                            >
-                            <InputNumber min={0} max={12}></InputNumber> 个月
+                            label="实习时长（止）"
+                        >
+                            <InputNumber defaultValue={6} min={0} max={12}></InputNumber> 个月
                         </Form.Item>
                     </Col>
                     </Row>
