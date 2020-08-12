@@ -52,5 +52,6 @@ export default {
   'menu.company': '企业管理',
   'menu.company.list': '所有企业',
   'menu.company.position': '职位管理',
-  'menu.senior': '学长管理'
+  'menu.senior': '学长管理',
+  'menu.cusers': '用户管理'
 };

@@ -67,28 +67,6 @@ export default defineConfig({
               component: './Welcome',
             },
             {
-              path: '/admin',
-              name: 'admin',
-              icon: 'crown',
-              component: './Admin',
-              authority: ['admin'],
-              routes: [
-                {
-                  path: '/admin/sub-page',
-                  name: 'sub-page',
-                  icon: 'smile',
-                  component: './Welcome',
-                  authority: ['admin'],
-                },
-              ],
-            },
-            {
-              name: 'list.table-list',
-              icon: 'table',
-              path: '/list',
-              component: './ListTableList',
-            },
-            {
               name: 'company',
               path: '/company',
               icon: 'crown',
@@ -112,6 +90,12 @@ export default defineConfig({
               path: '/senior',
               icon: 'crown',
               component: './senior',
+            },
+            {
+              name: 'cusers',
+              path: '/cusers',
+              icon: 'crown',
+              component: './cusers',
             },
             {
               component: './404',
