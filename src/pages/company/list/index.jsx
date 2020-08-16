@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect, history } from 'umi';
 
@@ -71,7 +71,7 @@ const index = ({ list, dispatch }) => {
                 >
                     <Button size="small" type="danger">删除</Button>
                 </Popconfirm>
-                <Button size="small" type="default" onClick={() => handlePosition(record.id)}>查看职位</Button>
+                <Button size="small" type="default" onClick={() => handlePosition(record.id, record.name)}>查看职位</Button>
               </Space>
             ),
           },
@@ -120,8 +120,8 @@ const index = ({ list, dispatch }) => {
         }
         setVisible(true);
     };
-    const handlePosition = (id) => {
-        history.push(`/company/position/${id}`);
+    const handlePosition = (id, name) => {
+        history.push(`/company/position/${id}/${name}`);
     };
 
     const handleSubmit = () => {

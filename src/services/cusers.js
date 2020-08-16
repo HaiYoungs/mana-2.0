@@ -25,7 +25,7 @@ export const getRemoteList = async () => {
 // 删除用户
 export const deleteRemote = async (id) => {
     //id = id.toString();
-    return request(baseUrl + '/senior/delete', {
+    return request(baseUrl + '/user/delete', {
         method: 'POST',
         params: {id},
     });

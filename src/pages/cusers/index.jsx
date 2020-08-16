@@ -23,8 +23,8 @@ const index = ({ cusers, dispatch }) => {
                 <img style={{
                     width: '40%',
                     position: 'absolute',
-                    top: '10',
-                    left: '20',
+                    top: '10px',
+                    left: '20px',
                 }} src={t}></img>
             )
         },
@@ -85,7 +85,7 @@ const index = ({ cusers, dispatch }) => {
         },
     ];
     let { data } = cusers;
-    console.log(data)
+    // console.log(data)
     if (data) {
         data = data.map(item => {
             return {...item, key: item.id}
@@ -106,7 +106,7 @@ const index = ({ cusers, dispatch }) => {
             if (res) {
                 message.success('删除成功');
                 dispatch({
-                    type: 'senior/getRemote'
+                    type: 'cusers/getRemote'
                 });
             }
         })
@@ -136,22 +136,8 @@ const index = ({ cusers, dispatch }) => {
                 onClose={handleCancel}
                 visible={visible}
                 bodyStyle={{ paddingBottom: 80 }}
-                footer={
-                    <div
-                    style={{
-                        textAlign: 'right',
-                    }}
-                    >
-                    <Button onClick={handleCancel} style={{ marginRight: 8 }}>
-                        取消
-                    </Button>
-                    <Button onClick={handleCancel} type="primary">
-                        提交
-                    </Button>
-                    </div>
-                }
             >
-              <Descriptions title="用户信息">
+              <Descriptions title={formData.name}>
                 <Descriptions.Item label="昵称">{formData.name}</Descriptions.Item>
                 <Descriptions.Item label="生日">{formData.birthday}</Descriptions.Item>
                 <Descriptions.Item label="性别">{formData.sex}</Descriptions.Item>
@@ -168,8 +154,6 @@ const index = ({ cusers, dispatch }) => {
                 <Descriptions.Item label="头像">
                     <img style={{ width: '30%' }} src={formData.pic}></img>
                 </Descriptions.Item>
-
-                
               </Descriptions>
             </Drawer>
         </PageHeaderWrapper>

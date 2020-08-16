@@ -177,7 +177,7 @@ const index = ({ position, dispatch }) => {
         <PageHeaderWrapper>
             <ProTable
                 columns={columns}
-                headerTitle="职位管理"
+                headerTitle={params.name == ':name' ? '所有职位' : params.name}
                 dataSource={data}
             />
             <Drawer

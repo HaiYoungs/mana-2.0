@@ -80,7 +80,7 @@ export default defineConfig({
                 {
                   name: 'position',
                   icon: 'smile',
-                  path: '/company/position/:id',
+                  path: '/company/position/:id/:name',
                   component: './company/position',
                 }
               ],
