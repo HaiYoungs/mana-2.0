@@ -2,13 +2,11 @@ import { request } from 'umi';
 const baseUrl = 'http://121.199.62.162:8080'; // 服务器地址
 
 // 获取职位列表
-export const getRemoteList = async () => {
+export const getRemoteList = async params => {
+    console.log(params);
     return request(baseUrl + '/job/pagelist', {
         method: 'GET',
-        params: {
-            everyPage: 10,
-            clientPage: 1,
-        },
+        params,
     })
     .then(res => {
         if (res.status == 200) {
@@ -21,13 +19,10 @@ export const getRemoteList = async () => {
 }
 // 根据公司 id 获取职位列表
 export const getRemoteListById = async params => {
+    console.log(params)
     return request(baseUrl + '/job/search', {
         method: 'POST',
-        params: {
-            everyPage: 10,
-            clientPage: 1,
-            id: params.id,
-        }
+        params,
     })
     .then(res => {
         console.log(res);

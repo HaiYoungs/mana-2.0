@@ -58,7 +58,7 @@ export default defineConfig({
           routes: [
             {
               path: '/',
-              redirect: '/welcome',
+              redirect: '/user/login',
             },
             {
               path: '/welcome',
@@ -69,17 +69,15 @@ export default defineConfig({
             {
               name: 'company',
               path: '/company',
-              icon: 'crown',
+              icon: 'bank',
               routes: [
                 {
                   path: '/company/list',
                   name: 'list',
-                  icon: 'smile',
                   component: './company/list',
                 },
                 {
                   name: 'position',
-                  icon: 'smile',
                   path: '/company/position/:id/:name',
                   component: './company/position',
                 }
@@ -88,13 +86,13 @@ export default defineConfig({
             {
               name: 'senior',
               path: '/senior',
-              icon: 'crown',
+              icon: 'usergroup-add',
               component: './senior',
             },
             {
               name: 'cusers',
               path: '/cusers',
-              icon: 'crown',
+              icon: 'user',
               component: './cusers',
             },
             {

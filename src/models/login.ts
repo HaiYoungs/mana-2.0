@@ -54,7 +54,7 @@ const Model: LoginModelType = {
             return;
           }
         }
-        history.replace(redirect || '/');
+        history.replace(redirect || '/welcome');
       }
     },
 

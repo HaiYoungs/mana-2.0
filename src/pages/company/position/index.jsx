@@ -13,11 +13,13 @@ import { updateRemote, deleteRemote, addRemote, getSelectRemote } from '@/servic
 
 const index = ({ position, dispatch }) => {
     const [visible, setVisible] = useState(false);
+    const [addVisible, setAddVisible] = useState(false);
     const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(false);
-    // const [isAdd, setIsAdd] = useState(true); // 区分新增和修改
+    const [isAdd, setIsAdd] = useState(false); // 区分新增和修改
     const [selTypeList, setSelTypeList] = useState([]); // 下拉列表数据
     const [selPropertyList, setSelPropertyList] = useState([]);
+    const [pageInfo, setPageInfo] = useState({ current: 1, pageSize: 10, total: undefined })
 
     const params = useParams();
     useEffect(() => {
@@ -27,16 +29,32 @@ const index = ({ position, dispatch }) => {
     },[formData]);
     useEffect(() => {
         if (params.id == ':id') { // 所有职位
+            setAddVisible(false);
+            setPageInfo({ current: 1, pageSize: 10, total: 30 });
             dispatch({
                 type: 'position/getRemote',
+                payload: {
+                    clientPage: 1,
+                    everyPage: 10,
+                }
             });
         } else { // 按公司查看
+            setAddVisible(true);
             dispatch({
                 type: 'position/getRemoteById',
-                payload: params,
+                payload: {
+                    id: params.id,
+                    everyPage: 10,
+                    clientPage: 1,
+                },
+                callback: ({ sumPage }) => {
+                    setPageInfo({ current: pageInfo.current, pageSize: pageInfo.pageSize, total: sumPage })
+                }
             });
+            
         }
     }, []);
+    
 
     const columns = [
         {
@@ -93,15 +111,16 @@ const index = ({ position, dispatch }) => {
             ),
           },
     ];
-    let { data, pager } = position; // 表格数组
-
+    let { data, pager = {} } = position; // 表格数组
+    
     const formRef = React.createRef();// 定位表单
 
     const handleEdit = (record) => {
+        setIsAdd(false);
         getSelectData();
         // record.workMonthMin = Number(record.workMonthMin);
         // record.workMonthMax = Number(record.workMonthMax);
-        console.log(record)
+        // console.log(record)
         setFormData(record);
         if (formRef.current != null) { // 利用表单重置实现表单数据更新
             formRef.current.resetFields();
@@ -132,8 +151,31 @@ const index = ({ position, dispatch }) => {
     const handleSubmit = () => {
         const fieldsValue = formRef.current.getFieldsValue();
         setLoading(true);
-        // 发送请求
-        
+        if (isAdd) { // 新增
+            fieldsValue.id = params.id;
+            // console.log(fieldsValue);
+            addRemote(fieldsValue)
+            .then(res => {
+                // console.log(res);
+                if (res.data) {
+                    setLoading(false);
+                    setVisible(false);
+                    setFormData({})
+                    message.success(res.msg);
+                    dispatch({
+                        type: 'position/getRemoteById',
+                        payload: {
+                            id: params.id,
+                            everyPage: pageInfo.pageSize,
+                            clientPage: pageInfo.current,
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            })
+        } else { // 修改
             fieldsValue.jobId = formData.jobId;
             console.log(fieldsValue)
             updateRemote(fieldsValue)
@@ -141,21 +183,72 @@ const index = ({ position, dispatch }) => {
                 if (res.msg == "修改成功") {
                     setLoading(false);
                     setVisible(false);
+                    setFormData({});
                     message.success(res.msg);
-                    dispatch({
-                        type: 'list/getRemote'
-                    });
+                    dispatch(
+                        addVisible ?
+                        {
+                            type: 'position/getRemoteById',
+                            payload: {
+                                id: params.id,
+                                everyPage: pageInfo.pageSize,
+                                clientPage: pageInfo.current,
+                            },
+                        }
+                        :
+                        {
+                            type: 'position/getRemote',
+                            payload: {
+                                everyPage: pageInfo.pageSize,
+                                clientPage: pageInfo.current,
+                            }
+                        }
+                    );
                 }
             })
             .catch(err => {
                 setLoading(false);
                 message.error(err);
             });
-        
+        }
     };
 
     const handleCancel = () => {
       setVisible(false);
+    };
+
+    // 新增职位
+    const handleAdd = () => {
+        setIsAdd(true);
+        getSelectData();
+        setVisible(true);
+    };
+
+    const handleTableChange = (pagination) => {
+        setPageInfo({
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pageInfo.total
+        });
+        dispatch(
+            addVisible ?
+            {
+                type: 'position/getRemoteById',
+                payload: {
+                    id: params.id,
+                    clientPage: pagination.current,
+                    everyPage: pagination.pageSize,
+                }
+            }
+            : 
+            {
+                type: 'position/getRemote',
+                payload: {
+                    clientPage: pagination.current,
+                    everyPage: pagination.pageSize,
+                }
+            }
+        );
     };
 
     const getSelectData = () => { // 获取下拉框数据
@@ -179,6 +272,14 @@ const index = ({ position, dispatch }) => {
                 columns={columns}
                 headerTitle={params.name == ':name' ? '所有职位' : params.name}
                 dataSource={data}
+                toolBarRender={() => (addVisible ? [
+                    <Button key="3" type="primary" onClick={handleAdd}>
+                      <PlusOutlined />
+                      新建职位
+                    </Button>,
+                ] : [])}
+                pagination={pageInfo}
+                onChange={handleTableChange}
             />
             <Drawer
                 title="查看/编辑职位信息"
@@ -303,9 +404,9 @@ const index = ({ position, dispatch }) => {
                                 <Option value="中专" key={3}>中专</Option>
                                 <Option value="高中" key={4}>高中</Option>
                                 <Option value="大专" key={5}>大专</Option>
-                                <Option value="本科" key={5}>本科</Option>
-                                <Option value="硕士" key={5}>硕士</Option>
-                                <Option value="博士" key={5}>博士</Option>
+                                <Option value="本科" key={6}>本科</Option>
+                                <Option value="硕士" key={7}>硕士</Option>
+                                <Option value="博士" key={8}>博士</Option>
                             </Select>
                         </Form.Item>
                     </Col>

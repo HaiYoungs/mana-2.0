@@ -8,33 +8,39 @@ const PositionModel = {
     },
     reducers: {
         getDataList(state, { payload }) {
-            console.log(payload)
             return {...payload};
         }
     },
     effects: {
-        *getRemote(action, { put, call }) {
-            const data = yield call(getRemoteList);
+        *getRemote({ payload }, { put, call }) {
+            const data = yield call(getRemoteList, payload);
+            console.log(data)
             yield put({
                 type: 'getDataList',
                 payload: { data }
             })
         },
-        *getRemoteById({ payload }, { put, call }) {
+        *getRemoteById({ payload, callback }, { put, call }) {
             const data = yield call(getRemoteListById, payload);
             console.log(data)
             yield put({
                 type: 'getDataList',
-                payload: { data: data.data, pager: data.pager },
-            })
+                payload: { data: data.data },
+            });
+            callback(data.pager)
         }
     },
     subscriptions: {
         // setup({ dispatch, history }) {
         //     return history.listen(({ pathname }) => {
-        //         if (pathname === '/company/position') {
+        //         console.log(pathname)
+        //         if (pathname === '/company/position/:id/:name') {
         //             dispatch({
         //                 type: 'getRemote',
+        //                 payload: {
+        //                     everyPage: 10,
+        //                     clientPage: 1,
+        //                 }
         //             })
         //         }
         //     })
